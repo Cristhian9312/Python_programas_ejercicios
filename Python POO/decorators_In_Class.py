@@ -33,6 +33,7 @@ print("esto es...",renault.kilometros_property)
 renault.kilometros=500
 renault.espesificaciones()
 renault.kilometros=200
+renault.consumo_total()
 
 
  
