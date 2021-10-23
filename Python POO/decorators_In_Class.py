@@ -12,8 +12,13 @@ class Coche: # esta es la clase tipo coche
         La potencia del auto es de: {self._potencia} \n
         El consumo del auto es de {self._consumo} litros * KM\n
         Kilometros actuales: {self._km_actuales}""") 
+        
+    @property
+    def kilometros_property(self):
+        return self._km_actuales
 
-    def actualizar_kilometros(self, kilometros):
+    @kilometros_property.setter
+    def kilometros(self, kilometros):
         if kilometros > self._km_actuales:
             self._km_actuales = kilometros
         else:
@@ -23,9 +28,11 @@ class Coche: # esta es la clase tipo coche
         consumo = (self._km_actuales/100)*self._consumo
         print("El consumo total es de {} litros ".format(consumo))
 
-renault = Coche("modelo 2015", 80, 2)
-renault.espesificaciones() 
-renault.actualizar_kilometros(1000)
+renault = Coche("modelo 2020", 88, 7)
+print("esto es...",renault.kilometros_property)
+renault.kilometros=500
 renault.espesificaciones()
-renault.consumo_total()
+renault.kilometros=200
+
+
  
