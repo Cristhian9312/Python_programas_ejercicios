@@ -1,3 +1,4 @@
+from operator import le
 import time
 import turtle
 import random
@@ -39,6 +40,7 @@ class SnakeGame:
         self._delay = 0.1
         self._score = 0
         self._high_score = 0
+        self.snake_cuerpo = []
         # Asociacion de los movimientos y las teclas 
         self.screen.listen() 
         self.screen.onkeypress(self.arriba,"w")
@@ -69,25 +71,35 @@ class SnakeGame:
             self._direccion= "derecha"
 
     def muve(self):
+        #obtener las coordenadas de la cabeza de la snake
+        hx, hy = self.snake.xcor(), self.snake.ycor()
+
+        #mover el cuerpo de la snake
+        for i in range(len(self.snake_cuerpo)-1,0,-1):
+            x = self.snake_cuerpo[i-1].xcor()
+            y = self.snake_cuerpo[i-1].ycor()
+            self.snake_cuerpo[i].goto(x,y)
+
+        #mover el segmento mas cercano a la cabeza
+        if len(self.snake_cuerpo)>0:
+            self.snake_cuerpo[0].goto(hx, hy)
+
         """Se mueve la snake hacia todos los lados sumando 20 puntos"""
         if self._direccion == "arriba":
-            y = self.snake.ycor()
-            self.snake.sety(y+20)
+            self.snake.sety(hy+20)
         elif self._direccion == "abajo":
-            y = self.snake.ycor()
-            self.snake.sety(y-20)
+            self.snake.sety(hy-20)
         elif self._direccion == "isquierda":
-            x = self.snake.xcor()
-            self.snake.setx(x-20)
+            self.snake.setx(hx-20)
         elif self._direccion == "derecha":
-            x = self.snake.xcor()
-            self.snake.setx(x+20)
+            self.snake.setx(hx+20)
     
     def jugar(self):
         while True:
             self.screen.update()
             self.colision_borde()
             self.colision_comida()
+            self.colision_cuerpo()
             time.sleep(self._delay)
             self.muve()
         self.screen.mainloop()
@@ -97,16 +109,12 @@ class SnakeGame:
         bycor = (self._alto // 2) -10
         
         if self.snake.xcor() > bxcor or self.snake.xcor() < -bxcor or  self.snake.ycor() > bycor or self.snake.ycor() < -bycor:
-            time.sleep(1)
-            self.snake.goto(0,0)
-            self._direccion=None
-            # reiniciar el delay
-            self._delay = 0.1
-            #reiniciar el score
-            if self._score > self._high_score:
-                self._high_score = self._score
-            self._score = 0
-            self._print_score() 
+            self._reset()
+
+    def colision_cuerpo(self):
+        for s in self.snake_cuerpo:
+            if s.distance(self.snake) < 20:
+                self._reset()
         
     def colision_comida(self):
         if self.snake.distance(self.comida) < 20:
@@ -116,15 +124,43 @@ class SnakeGame:
             x = random.randint(-bxcor, bxcor)
             y = random.randint(-bycor, bycor)
             self.comida.goto(x,y)
+            #incrementar el cuerpo de la snake
+            self.incrementar_cuerpo()     
+            #reducir el dalay
             self._delay -= 0.001 
             # Aumentar el score
             self._score += 10 
             self.texto.write
             self._print_score()
 
+    def incrementar_cuerpo(self):
+        segmento = turtle.Turtle()
+        segmento.speed(0)
+        segmento.shape('square')
+        segmento.color('grey')
+        segmento.penup()
+        self.snake_cuerpo.append(segmento)
+
     def _print_score(self):
         self.texto.clear()
         self.texto.write(f"puntos: {self._score} Record: {self._high_score}", align="center", font=("currier",24,"normal")) 
+    
+    def _reset(self):
+        time.sleep(1)
+        self.snake.goto(0,0)
+        self._direccion=None
+        #reinicio del cuerpo de la snake
+        for s in self.snake_cuerpo:
+            s.ht()
+        # limpiar la lista de segmentos
+        self.snake_cuerpo.clear()
+        # reiniciar el delay
+        self._delay = 0.1
+        #reiniciar el score
+        if self._score > self._high_score:
+            self._high_score = self._score
+        self._score = 0
+        self._print_score() 
     
 juego_snake = SnakeGame()
 juego_snake.jugar()
